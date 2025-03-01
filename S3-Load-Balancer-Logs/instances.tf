@@ -18,7 +18,7 @@ resource "aws_instance" "max_global_instance_1" {
   vpc_security_group_ids = [aws_security_group.public_sg.id]
   tags                   = local.common_tags
   iam_instance_profile   = aws_iam_instance_profile.allow_ec2_s3.name
-  depends_on             = [aws_iam_policy.allow_ec2_s3]
+  depends_on             = [aws_iam_role_policy.allow_ec2_s3]
 
 
   user_data = <<EOF
@@ -40,7 +40,7 @@ resource "aws_instance" "max_global_instance_2" {
   vpc_security_group_ids = [aws_security_group.public_sg.id]
   tags                   = local.common_tags
   iam_instance_profile   = aws_iam_instance_profile.allow_ec2_s3.name
-  depends_on             = [aws_iam_policy.allow_ec2_s3]
+  depends_on             = [aws_iam_role_policy.allow_ec2_s3]
 
   user_data = <<EOF
 #! /bin/bash
