@@ -21,11 +21,6 @@ data "aws_iam_policy_document" "allow_access_alb" {
       "arn:aws:s3:::${local.s3_bucket_name}/alb-logs/*"
     ]
   }
-}
-
-# AWS IAM Policy Document
-# - Configuring AWS Log Delivery Service access to S3
-data "aws_iam_policy_document" "allow_access_alds" {
   statement {
     effect = "Allow"
 
@@ -55,35 +50,23 @@ resource "aws_s3_bucket" "max_global_s3" {
   bucket        = local.s3_bucket_name
   force_destroy = true
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-s3-bucket" })
 }
 
 # S3 Bucket Object
 resource "aws_s3_object" "website" {
-  bucket = local.s3_bucket_name
-  key    = "/website/index.html"
-  source = "./website/index.html"
+  bucket   = aws_s3_bucket.max_global_s3.id
+  for_each = local.webcontent
 
-  tags = local.common_tags
-}
+  key    = each.value
+  source = "${path.root}/${each.value}"
 
-# AWS S3 Object
-resource "aws_s3_object" "graphic" {
-  bucket = local.s3_bucket_name
-  key    = "/website/Globo_logo_Vert.png"
-  source = "./website/Globo_logo_Vert.png"
-
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-webcontent" })
 }
 
 # AWS S3 Bucket Policy
 # - Need to grant access for LB to access S3 and write logs into bucket
 resource "aws_s3_bucket_policy" "allow_access_alb" {
-  bucket = local.s3_bucket_name
+  bucket = aws_s3_bucket.max_global_s3.id
   policy = data.aws_iam_policy_document.allow_access_alb.json
-}
-
-resource "aws_s3_bucket_policy" "allow_access_alds" {
-  bucket = local.s3_bucket_name
-  policy = data.aws_iam_policy_document.allow_access_alds.json
 }

@@ -11,11 +11,11 @@ data "aws_elb_service_account" "root" {}
 
 # Load Balancer
 resource "aws_lb" "max_global_lb" {
-  name               = "max-global-lb"
+  name               = "${local.naming_prefix}-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.public_subnet1.id, aws_subnet.public_subnet2.id]
+  subnets            = aws_subnet.public_subnets[*].id
 
   enable_deletion_protection = false
 
@@ -27,18 +27,18 @@ resource "aws_lb" "max_global_lb" {
 
   depends_on = [aws_s3_bucket_policy.allow_access_alb]
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-lb" })
 }
 
 # Load Balancer Target Group
 # - Grouping of servers that receive traffic from the LB
 resource "aws_lb_target_group" "alb_tg" {
-  name     = "lb-target-group"
+  name     = "${local.naming_prefix}-lb-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.app.id
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-lb-tg" })
 }
 
 # Load Balancer Listener
@@ -53,19 +53,13 @@ resource "aws_lb_listener" "alb_listener" {
     target_group_arn = aws_lb_target_group.alb_tg.arn
   }
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-lb-listener" })
 }
 
 # aws_lb_target_group_attachment for first instance
 resource "aws_lb_target_group_attachment" "max_global_instance_1" {
+  count            = var.instance_count
   target_group_arn = aws_lb_target_group.alb_tg.arn
-  target_id        = aws_instance.max_global_instance_1.id
-  port             = 80
-}
-
-# aws_lb_target_group_attachment for second instance
-resource "aws_lb_target_group_attachment" "max_global_instance_2" {
-  target_group_arn = aws_lb_target_group.alb_tg.arn
-  target_id        = aws_instance.max_global_instance_1.id
+  target_id        = aws_instance.max_global_instance[count.index].id
   port             = 80
 }

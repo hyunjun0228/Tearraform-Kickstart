@@ -22,15 +22,16 @@ variable "vpc_cidr_block" {
   default     = "10.0.0.0/16"
 }
 
+variable "vpc_public_subnet_counts" {
+  type        = number
+  description = "Number of public subnets"
+  default     = 2
+}
+
 variable "vpc_public_subnets_cidr_block" {
   type        = list(string)
   description = "CIDR Block for Public Subnets in VPC"
   default     = ["10.0.0.0/24", "10.0.1.0/24"]
-}
-variable "vpc_private_subnets_cidr_block" {
-  type        = list(string)
-  description = "CIDR Block for Private Subnets in VPC"
-  default     = ["10.0.2.0/24", "10.0.3.0/24"]
 }
 
 variable "map_public_ip_on_launch" {
@@ -43,6 +44,12 @@ variable "instance_type" {
   type        = string
   description = "Type for EC2 instance"
   default     = "t2.micro"
+}
+
+variable "instance_count" {
+  type        = number
+  description = "Number of EC2 instances"
+  default     = 2
 }
 
 variable "company" {
@@ -59,4 +66,16 @@ variable "project" {
 variable "billing_code" {
   type        = string
   description = "Billing Code"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment Name"
+  default     = "development"
+}
+
+variable "naming_prefix" {
+  type        = string
+  description = "Naming prefix for project"
+  default     = "max-global"
 }

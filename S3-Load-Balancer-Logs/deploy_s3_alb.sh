@@ -1,6 +1,5 @@
 # Discover availability zones, subnets, application load balancer, target group, load balancer listener, and target group attachment.
 # terraform state list
-# terraform state show aws_instance.taco_instance_1
 terraform init
 terraform fmt
 terraform validate
